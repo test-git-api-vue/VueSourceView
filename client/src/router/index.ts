@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Login from '../Pages/Login/Index.vue'
+import ReposList from '../Pages/ReposList/Index.vue'
 
 Vue.use(VueRouter)
 
@@ -9,6 +10,12 @@ const routes: Array<RouteConfig> = [
     path: '/',
     name: 'Login',
     component: Login
+  },
+  {
+    path: '/repos',
+    name: 'ReposList',
+    component: ReposList,
+    props: true
   }
 ]
 

@@ -48,7 +48,7 @@
             type="text"
             @keyup="validate"
             value=""
-            v-model="login"
+            v-model="credentials.login"
             requred
           ></v-text-field>
         </v-card-text>
@@ -61,7 +61,7 @@
             label="Персональный токен"
             :type="this.passwordMasked ? 'password' : 'text'"
             @keyup="validate"
-            v-model="password"
+            v-model="credentials.token"
             requred>
           </v-text-field>
           <!-- <v-spacer/> -->
@@ -73,7 +73,7 @@
 
  <v-card-actions>
      <v-btn
-        :disabled="this.login == '' && this.password == ''"
+        :disabled="credentials.login == '' && credentials.password == ''"
         color="error"
         depressed
         @click="reset"
@@ -82,7 +82,7 @@
 
       <v-btn
       id="showTokenBtn"
-        :disabled="this.password == ''"
+        :disabled="credentials.password == ''"
         color="warning"
         depressed
         @click="showPassword"
@@ -94,7 +94,7 @@
         :disabled="!valid"
         color="success"
         depressed
-        @click="validate"
+        @click="tryLogin"
       >
         Войти
       </v-btn>
@@ -109,30 +109,39 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
+import Credential from '../../Models/credentials'
 
 @Component
 export default class Login extends Vue {
 valid = true;
 passwordMasked = true;
-login = '';
-password = '';
+
+private credentials = new Credential();
 
 get showTokenBtnCaption () {
   return this.passwordMasked ? 'Показать токен' : 'Скрыть токен'
 }
 
 validate () {
-  this.valid = this.login !== '' && this.password !== ''
+  this.valid = this.credentials.login !== '' && this.credentials.token !== '';
+}
+
+tryLogin(){
+  this.validate();
+
+  if (this.valid)
+  {
+    (Vue as any).router.push({ name: 'ReposList', params: { credentials: this.credentials }})
+  }
 }
 
 reset () {
-  this.login = ''
-  this.password = ''
+  this.credentials.login = ''
+  this.credentials.token = ''
   this.valid = true
 }
 
 showPassword () {
-// todo менять текст
   this.passwordMasked = !this.passwordMasked
 }
 }
