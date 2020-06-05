@@ -1,7 +1,24 @@
-export default interface RepositoryInfo{
-    //{ icon: 'folder', iconClass: 'grey lighten-1 white--text', title: 'Photos', subtitle: 'Jan 9, 2014' },
-    icon:string;
-    iconClass:string;
-    title:string;
-    subtitle:string;
+export default class RepositoryInfo{
+    description?: string;
+    name?: string;
+    pushedAt?: string;
+
+    constructor(o?: any)
+    {
+        if (!o)
+        {
+            return;
+        }
+//
+        this.name = o.name;
+        this.pushedAt = new Date(o.pushed_at).toLocaleString("ru", 
+        {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric'
+        });
+    }
 }
