@@ -1,4 +1,5 @@
 <template>
+<div>
     <v-app-bar app color="primary" dark>
         <div class="d-flex align-center">
           <v-img
@@ -20,20 +21,25 @@
           <v-icon>mdi-open-in-new</v-icon>
         </v-btn>
       </v-app-bar>
+
+</div>
 </template>
 
+<style scoped>
+
+</style>
 
 <script lang="ts">
   import { Component, Vue, Prop } from "vue-property-decorator";
+import BasePage from '../Pages/BasePage';
 
 @Component
   export default class AppHeader extends Vue { 
       
-      data() {
-          return {
-              
-          }
+      
+        
+          
+      
       }
-  }
 
 </script>

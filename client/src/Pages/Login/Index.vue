@@ -7,8 +7,7 @@
         <v-card-title class="title font-weight-regular justify-space-between">
           <span>Вход</span>
         </v-card-title>
-
-      -     <v-window>
+      <v-window>
         <v-window-item :value="1">
           <v-card-text>
             <v-text-field
@@ -69,9 +68,10 @@
 import { Vue, Component } from "vue-property-decorator";
 import Credential from "../../Models/credentials";
 import AppHeader from "../../components/AppHeader.vue";
+import BasePage from '../BasePage';
 
 @Component({ components: { AppHeader } })
-export default class Login extends Vue {
+export default class Login extends BasePage {
   valid = true;
   passwordMasked = true;
 
