@@ -55,6 +55,8 @@
           <v-icon left>mdi-arrow-left-bold-outline</v-icon>
           <span class="mr-2">К списку репозиториев</span>
         </v-btn>
+        <v-spacer></v-spacer>
+         <span class="last-loaded-time">Данные загружены: {{getConvertedTime(this.lastUpdated)}}</span>
       </v-row>
     </v-container>
 
@@ -69,6 +71,12 @@
 </template>
 
 <style scoped>
+
+.last-loaded-time
+{
+  padding-right:12px
+}
+
 .v-btn {
   color: white;
   margin-top: 5px;
@@ -116,6 +124,7 @@ export default class RepoCommitsList extends BasePage {
   private repoInfo = {} as RepositoryInfo;
   private commitDetails = {} as any;
   private commitDetailsShown = false;
+  private lastUpdated: Date|undefined;
 
   branches = [];
   commits = [];
@@ -191,6 +200,7 @@ beforeMount() {
           .then(response => {
             this.isLoading = false;
             this.commits = response.data;
+            this.lastUpdated = new Date()
           })
           .catch(error => {
             this.isLoading = false;
@@ -241,6 +251,7 @@ selectedBranchChanged() {
       .then(response => {
         this.isLoading = false;
         this.commits = response.data;
+        this.lastUpdated = new Date()
       })
       .catch(error => {
         this.isLoading = false;
