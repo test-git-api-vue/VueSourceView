@@ -1,20 +1,29 @@
 <template>
   <v-app>
-    <AppHeader></AppHeader>
+    <v-container fluid pl-3 pr-1>
+
+    <v-row wrap>
+        <AppHeader></AppHeader>
+      </v-row>
     
-      <v-card min-width="100%" class="mx-auto">
-        <v-toolbar color="#e8f4f8" light flat>
-          <!-- <v-toolbar color="#d4ebf2" light flat> -->
-          <v-toolbar-title>Список репозиториев '{{userInfo.login}}'</v-toolbar-title>
-
+<v-row align="center" justify="center" wrap class="no-padding-left">
+        <v-col cols="11" class="no-top-bottom-paddings">
+          <v-label>Список репозиториев '{{userInfo.login}}'</v-label>
+        </v-col>
+        <v-col>
           <v-spacer></v-spacer>
-
-          <v-btn icon>
+        </v-col>
+         <v-col class="no-paddings">
+           <v-spacer></v-spacer>
+           <v-btn icon>
             <v-icon>mdi-magnify</v-icon>
           </v-btn>
-        </v-toolbar>
+           </v-col>
+        </v-row>
 
-        <v-list two-line flat color="#f7fbfd">
+<v-row class="no-left-right-margins">
+      <v-card min-width="100%" class="mx-auto">
+        <v-list two-line flat class="no-left-right-margins">
           <v-list-item v-for="repo in reposList" :key="repo.name" @click="showRepoDetails(repo)">
             <v-list-item-avatar>
               <v-icon>mdi-folder</v-icon>
@@ -30,20 +39,50 @@
           </v-list-item>
         </v-list>
       </v-card>
-    <v-row>
+</v-row>
+
+    <v-row class="no-left-right-margins">
     <v-spacer/>
-    <v-btn color="warning" depressed width="200px" @click="backToLoginPage">
+    <v-btn color="warning" width="200px" @click="backToLoginPage">
       <v-icon left>mdi-arrow-up-bold-outline</v-icon>
       <span class="mr-2">Выйти</span>
     </v-btn>
 </v-row>
+
     <WaitOverlay v-bind:isWait="isLoading"></WaitOverlay>
+
+</v-container>
   </v-app>
+
 </template>
 
 <style scoped>
-.red-text {
-  color: red;
+.v-btn {
+  color: white;
+  margin-top: 5px;
+}
+.v-select {
+  max-width: 200px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.no-paddings {
+  padding: 0px;
+}
+
+.no-padding-left {
+  padding-left: 0px;
+}
+
+.no-top-bottom-paddings {
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+.no-left-right-margins {
+  margin-left: 0px;
+  margin-right: 0px;
 }
 </style>
 
