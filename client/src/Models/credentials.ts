@@ -1,9 +1,4 @@
-export default class Credentials{
-    login: string;
+export default interface Credentials{
+    username: string;
     token: string;
-
-    constructor(){
-        this.login = '';
-        this.token = '';
-    }
 }

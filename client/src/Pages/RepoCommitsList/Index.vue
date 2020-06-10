@@ -117,8 +117,11 @@ import consts from "../../constants";
 
 @Component({ components: { AppHeader, WaitOverlay, CommitDetailPopup } })
 export default class RepoCommitsList extends BasePage {
-  @Prop() credentials: Credentials|undefined;
-  @Prop() repository: RepositoryInfo|undefined;
+  //@Prop() credentials: Credentials|undefined;
+  //@Prop() repository: RepositoryInfo|undefined;
+
+  credentials = {} as Credentials|undefined;
+  repository = {} as RepositoryInfo|undefined;
 
   private userInfo: Credentials|undefined;
   private repoInfo = {} as RepositoryInfo;
@@ -151,7 +154,7 @@ export default class RepoCommitsList extends BasePage {
   ];
 
 beforeMount() {
-     if (this.credentials == undefined || (this.credentials.token == "" && this.credentials.token == ""))
+     if (this.credentials == undefined || (this.credentials.username == "" && this.credentials.token == ""))
     {
       (Vue as any).router.push({ name: "Login" });
       return;
@@ -178,7 +181,7 @@ beforeMount() {
     axios
       .get(
         "https://api.github.com/repos/" +
-          this.userInfo.login +
+          this.userInfo.username +
           "/" +
           this.repoInfo.name +
           "/branches"
@@ -190,7 +193,7 @@ beforeMount() {
         axios
           .get(
             "https://api.github.com/repos/" +
-              this.userInfo.login +
+              this.userInfo.username +
               "/" +
               this.repoInfo.name +
               "/" +
@@ -221,7 +224,7 @@ beforeMount() {
   showCommitDetails(sha: string) {
     this.isLoading = true;
 
-   axios.get("https://api.github.com/repos/" + this.userInfo.login + "/" + this.repoInfo.name + "/" + "commits/" + sha)
+   axios.get("https://api.github.com/repos/" + this.userInfo.username + "/" + this.repoInfo.name + "/" + "commits/" + sha)
    .then(response => {
         this.isLoading = false;
         this.commitDetails = response.data;
@@ -241,7 +244,7 @@ selectedBranchChanged() {
     axios
       .get(
         "https://api.github.com/repos/" +
-          this.userInfo.login +
+          this.userInfo.username +
           "/" +
           this.repoInfo.name +
           "/" +

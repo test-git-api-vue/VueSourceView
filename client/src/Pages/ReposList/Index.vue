@@ -8,7 +8,7 @@
     
 <v-row align="center" justify="center" wrap class="no-padding-left">
         <v-col cols="11" class="no-top-bottom-paddings">
-          <v-label>Список репозиториев '{{userInfo.login}}'</v-label>
+          <v-label>Список репозиториев '{{userInfo.username}}'</v-label>
         </v-col>
         <v-col>
           <v-spacer></v-spacer>
@@ -97,7 +97,8 @@ import BasePage from '../BasePage';
 
 @Component({ components: { AppHeader,WaitOverlay } })
 export default class ReposList extends BasePage {
-  @Prop({ type: Credentials }) credentials: Credentials;
+  //@Prop({ type: Credentials }) credentials: Credentials;
+  credentials = {} as Credentials;
 
   private readonly userInfo: Credentials;
 
@@ -106,7 +107,7 @@ export default class ReposList extends BasePage {
     if (
       this.credentials === undefined ||
       this.credentials === null ||
-      (this.credentials.token == "" && this.credentials.token == "")
+      (this.credentials.token == "" && this.credentials.username == "")
     ) {
       (Vue as any).router.push({ name: "Login" });
     }
@@ -120,7 +121,7 @@ export default class ReposList extends BasePage {
     this.isLoading = true;
     
     axios
-      .get("https://api.github.com/users/" + this.userInfo.login + "/repos")
+      .get("https://api.github.com/users/" + this.userInfo.username + "/repos")
       .then(
         response =>
           {
