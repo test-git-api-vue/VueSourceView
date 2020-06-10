@@ -13,6 +13,10 @@
         <v-card-text>
           <v-container>
             <v-row>
+              <span>Описание:</span>
+              <span>{{commitDetails.commit.message}}</span>
+            </v-row>
+            <v-row style="padding-top:5px">
               <!-- Таблица с изменениями файлов -->
               <v-data-table
                 dense

@@ -2,11 +2,12 @@
 <div>
     <v-app-bar app color="primary" dark>
         <div class="d-flex align-center">
+          <!-- https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png -->
           <v-img
             alt="Vuetify Logo"
             class="shrink mr-2"
             contain
-            src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
+            src="../assets/logo2.png"
             transition="scale-transition"
             width="40"
           />

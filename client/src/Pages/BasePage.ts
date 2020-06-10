@@ -7,6 +7,10 @@ import WaitOverlay from '../components/WaitOverlay.vue';
 @Component({ components: { WaitOverlay } })
 export default class BasePage extends Vue {
     protected isLoading=false;
+
+    updateTitle(route: Route) {
+        document.title = `VueSourceView ${ route.meta.title ? " | " + (route.meta.title) : "" }`;
+    }
 }
 
 
