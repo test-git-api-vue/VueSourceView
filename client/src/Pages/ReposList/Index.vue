@@ -24,7 +24,7 @@
 <v-row class="no-left-right-margins">
       <v-card min-width="100%" class="mx-auto">
         <v-list two-line flat class="no-left-right-margins">
-          <v-list-item v-for="repo in reposList" :key="repo.name" @click="showRepoDetails(repo)">
+          <v-list-item v-show="repo.owner == userLogin" v-for="repo in reposList" :key="repo.name" @click="showRepoDetails(repo)">
             <v-list-item-avatar>
               <v-icon>mdi-folder</v-icon>
             </v-list-item-avatar>

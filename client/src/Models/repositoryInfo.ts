@@ -2,6 +2,7 @@ export default class RepositoryInfo{
     description?: string;
     name?: string;
     pushedAt?: string;
+    owner?: string;
 
     constructor(o?: any)
     {
@@ -20,5 +21,6 @@ export default class RepositoryInfo{
             minute: 'numeric',
             second: 'numeric'
         });
+        this.owner = o.owner.login;
     }
 }
