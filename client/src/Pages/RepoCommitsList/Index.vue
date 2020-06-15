@@ -117,14 +117,12 @@ import consts from "../../constants";
 
 @Component({ components: { AppHeader, WaitOverlay, CommitDetailPopup } })
 export default class RepoCommitsList extends BasePage {
-  @Prop() credentials: Credentials|undefined;
   @Prop() repository: RepositoryInfo|undefined;
 
-  private userInfo: Credentials|undefined;
   private repoInfo = {} as RepositoryInfo;
   private commitDetails = {} as any;
   private commitDetailsShown = false;
-  private lastUpdated: Date|undefined;
+  private lastUpdated = new Date()
 
   branches = [];
   commits = [];
@@ -133,6 +131,14 @@ export default class RepoCommitsList extends BasePage {
 
   public get branchNames(): string[] {
     return (this.branches as any[]).map(x => x.name);
+  }
+
+  public get userLogin(){
+    return localStorage["vsv_login"];
+  }
+
+    public get userToken(){
+    return localStorage["vsv_token"];
   }
 
   private readonly headers = [
@@ -151,7 +157,9 @@ export default class RepoCommitsList extends BasePage {
   ];
 
 beforeMount() {
-     if (this.credentials == undefined || (this.credentials.token == "" && this.credentials.token == ""))
+
+
+     if (this.userLogin == undefined || (this.userLogin == "" && this.userToken == ""))
     {
       (Vue as any).router.push({ name: "Login" });
       return;
@@ -163,13 +171,12 @@ beforeMount() {
       return;
     }
 
-    this.userInfo = this.credentials as Credentials;
     this.repoInfo = this.repository as RepositoryInfo;
 }
 
   mounted() {
   
-  if (this.userInfo == undefined || this.repoInfo == null)
+  if (this.userLogin == undefined || this.repoInfo == null)
   {
     return;
   }
@@ -177,25 +184,37 @@ beforeMount() {
     this.isLoading = true;
     axios
       .get(
-        "https://api.github.com/repos/" +
-          this.userInfo.login +
+        "http://192.168.1.143:3001/https://api.github.com/repos/" +
+          this.userLogin +
           "/" +
           this.repoInfo.name +
           "/branches"
-      )
+      ,{headers:{
+        'x-requested-with': 'http://192.168.1.143:8080/',
+        'Authorization': 'token '+ this.userToken,
+         'X-OAuth-Scopes': 'repo',
+        }
+      })
       .then(branchesResponse => {
         this.branches = branchesResponse.data;
         this.selectedBranchName = branchesResponse.data[0].name;
 
         axios
           .get(
-            "https://api.github.com/repos/" +
-              this.userInfo.login +
+            "http://192.168.1.143:3001/https://api.github.com/repos/" +
+              this.userLogin +
               "/" +
               this.repoInfo.name +
               "/" +
               "commits?sha=" +
-              this.selectedBranchName
+              this.selectedBranchName,
+              {
+                headers:{
+                  'x-requested-with': 'http://192.168.1.143:8080/',
+                  'Authorization': 'token '+ this.userToken,
+                  'X-OAuth-Scopes': 'repo',
+                }
+              }
           )
           .then(response => {
             this.isLoading = false;
@@ -221,7 +240,15 @@ beforeMount() {
   showCommitDetails(sha: string) {
     this.isLoading = true;
 
-   axios.get("https://api.github.com/repos/" + this.userInfo.login + "/" + this.repoInfo.name + "/" + "commits/" + sha)
+   axios.get("http://192.168.1.143:3001/https://api.github.com/repos/" 
+   + this.userLogin + "/" + this.repoInfo.name + "/" + "commits/" + sha,
+   {
+     headers:{
+        'x-requested-with': 'http://192.168.1.143:8080/',
+        'Authorization': 'token '+ this.userToken,
+         'X-OAuth-Scopes': 'repo',
+     }
+   })
    .then(response => {
         this.isLoading = false;
         this.commitDetails = response.data;
@@ -240,13 +267,20 @@ selectedBranchChanged() {
 
     axios
       .get(
-        "https://api.github.com/repos/" +
-          this.userInfo.login +
+        "http://192.168.1.143:3001/https://api.github.com/repos/" +
+          this.userLogin +
           "/" +
           this.repoInfo.name +
           "/" +
           "commits?sha=" +
-          this.selectedBranchName
+          this.selectedBranchName,
+          {
+            headers:{
+              'x-requested-with': 'http://192.168.1.143:8080/',
+              'Authorization': 'token '+ this.userToken,
+              'X-OAuth-Scopes': 'repo',
+            }
+          }
       )
       .then(response => {
         this.isLoading = false;
@@ -262,7 +296,6 @@ selectedBranchChanged() {
   backToReposList() {
     (Vue as any).router.push({
       name: "ReposList",
-      params: { credentials: this.credentials }
     });
   }
 }

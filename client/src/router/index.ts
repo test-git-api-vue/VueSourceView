@@ -19,6 +19,14 @@ const routes: Array<RouteConfig> = [
     }
   },
   {
+    path: '/login-hub',
+    name: 'login-hub',
+    props: ['clientId', 'login'],
+    redirect: to => {
+      return "https://github.com/login/oauth/authorize?login=$loginclient_id=$clientId"
+    }
+  },
+  {
     path: '/',
     name: 'ReposList',
     component: ReposList,
@@ -50,6 +58,7 @@ const routes: Array<RouteConfig> = [
   },
   { 
     path: '*', 
+    name: '404',
     component: Error404,
     meta: {
       title: 'Error 404',

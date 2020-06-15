@@ -7,8 +7,7 @@
         <v-card-title class="title font-weight-regular justify-space-between">
           <span>Вход</span>
         </v-card-title>
-      <v-window>
-        <v-window-item :value="1">
+        <v-form>
           <v-card-text>
             <v-text-field
               label="Имя пользователя GitHub"
@@ -18,49 +17,29 @@
               v-model="credentials.login"
               requred
             ></v-text-field>
+            
           </v-card-text>
-        </v-window-item>
-
-
-          <v-window-item :value="1">
-            <v-card-text>
-              <v-text-field
-                id="passField"
-                label="Персональный токен"
-                :type="this.passwordMasked ? 'password' : 'text'"
-                @keyup="validate"
-                v-model="credentials.token"
-                requred
-              ></v-text-field>
-              <!-- <v-spacer/> -->
-            </v-card-text>
-          </v-window-item>
-        </v-window>
-
-        <v-divider></v-divider>
+        </v-form>
 
         <v-card-actions>
-          <v-btn
-            :disabled="credentials.login == '' && credentials.password == ''"
-            color="error"
-            depressed
-            @click="reset"
-          >Сбросить</v-btn>
+          <v-btn :disabled="credentials.login == ''" color="error" depressed @click="reset">Сбросить</v-btn>
 
-          <v-btn
-            id="showTokenBtn"
-            :disabled="credentials.password == ''"
-            color="warning"
-            depressed
-            @click="showPassword"
-          >{{showTokenBtnCaption}}</v-btn>
           <v-spacer />
-          <v-btn :disabled="!valid" color="success" depressed @click="tryLogin">Войти</v-btn>
+          <v-btn
+            :disabled="!valid"
+            type="submit"
+            color="success"
+            depressed
+            @click="tryLoginGitHub"
+          >Войти</v-btn>
         </v-card-actions>
       </v-card>
       <!-- </v-layout> -->
       <!-- </v-flex> -->
     </v-content>
+
+  <WaitOverlay v-bind:isWait="isLoading"></WaitOverlay>
+
   </v-app>
 </template>
 
@@ -68,7 +47,14 @@
 import { Vue, Component } from "vue-property-decorator";
 import Credential from "../../Models/credentials";
 import AppHeader from "../../components/AppHeader.vue";
-import BasePage from '../BasePage';
+import BasePage from "../BasePage";
+import consts from "../../constants";
+import router from "../../router";
+import loginForm from "./Login.vue";
+import axios, { AxiosPromise } from "axios";
+import vueResource from "vue-resource";
+
+Vue.use(vueResource);
 
 @Component({ components: { AppHeader } })
 export default class Login extends BasePage {
@@ -81,19 +67,78 @@ export default class Login extends BasePage {
     return this.passwordMasked ? "Показать токен" : "Скрыть токен";
   }
 
-  validate() {
-    this.valid = this.credentials.login !== "" && this.credentials.token !== "";
+  mounted() {
+    const authCode = this.$route.query.code;
+
+    if (authCode != undefined) {
+
+ this.isLoading = true;
+
+this.$http.post('http://192.168.1.143:3001/https://github.com/login/oauth/access_token?scope=repo',
+{
+  'client_id': consts.GITHUB_APP_CLIENT_ID,
+   'client_secret': consts.GITHUB_APP_CLIENT_SECRET,
+   'code': authCode,
+},
+{headers: {
+'Accept': 'application/json',
+'X-OAuth-Scopes': 'repo',
+'x-requested-with': 'http://192.168.1.143:8080/',
+}}
+)
+.then(response => {
+
+    this.isLoading = false;
+
+    this.credentials.token = response.data.access_token;
+
+    this.updateCredentialsAndGoNext();
+
+  }, error => {
+    // error callback
+     this.isLoading = false;
+
+     console.log("error: "+error);
+     //в случае ошибки, например из-за недоступности прокси, записываем дефолтный глобальный токен
+     this.credentials.token = consts.GITHUB_APP_FULL_ACCESS_TOKEN;
+
+     this.updateCredentialsAndGoNext();
+  })  ;
+}
+else{
+    this.credentials.login = "test-git-api-vue";
+    localStorage["vsv_login"] = this.credentials.login;
+}
+
+    
   }
 
-  tryLogin() {
-    this.validate();
 
-    if (this.valid) {
-      (Vue as any).router.push({
-        name: "ReposList",
-        params: { credentials: this.credentials }
-      });
-    }
+
+ public updateCredentialsAndGoNext() {
+   
+  localStorage["vsv_token"] = this.credentials.token;
+  
+    (Vue as any).router.push({
+      name: "ReposList",
+    });
+}
+
+  validate() {
+    this.valid = this.credentials.login !== "";
+  }
+
+  tryLoginGitHub() {
+    //Перенаправяем пользователя на GitHub для ввода пароля
+
+    localStorage["vsv_login"] = this.credentials.login;
+
+    window.location.href =
+      "https://github.com/login/oauth/authorize?login=" +
+      this.credentials.login +
+      "&client_id=" +
+      consts.GITHUB_APP_CLIENT_ID+
+      "&scope=repo";
   }
 
   reset() {

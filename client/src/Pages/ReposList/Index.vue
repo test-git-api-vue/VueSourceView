@@ -8,7 +8,7 @@
     
 <v-row align="center" justify="center" wrap class="no-padding-left">
         <v-col cols="11" class="no-top-bottom-paddings">
-          <v-label>Список репозиториев '{{userInfo.login}}'</v-label>
+          <v-label>Список репозиториев '{{userLogin}}'</v-label>
         </v-col>
         <v-col>
           <v-spacer></v-spacer>
@@ -97,21 +97,27 @@ import BasePage from '../BasePage';
 
 @Component({ components: { AppHeader,WaitOverlay } })
 export default class ReposList extends BasePage {
-  @Prop({ type: Credentials }) credentials: Credentials;
 
-  private readonly userInfo: Credentials;
+public get userLogin()
+{
+  return localStorage["vsv_login"];
+}
+
+public get userToken()
+{
+  return localStorage["vsv_token"];
+}
 
   constructor() {
     super();
+    
     if (
-      this.credentials === undefined ||
-      this.credentials === null ||
-      (this.credentials.token == "" && this.credentials.token == "")
+      this.userLogin === undefined ||
+      this.userLogin === null ||
+      (this.userToken == "" && this.userToken == "")
     ) {
       (Vue as any).router.push({ name: "Login" });
     }
-
-     this.userInfo = this.credentials;
   }
 
   reposList: Array<RepositoryInfo> = [] as Array<RepositoryInfo>;
@@ -119,16 +125,22 @@ export default class ReposList extends BasePage {
   mounted() {
     this.isLoading = true;
     
-    axios
-      .get("https://api.github.com/users/" + this.userInfo.login + "/repos")
-      .then(
-        response =>
-          {
+    this.$http
+      .get("http://192.168.1.143:3001/https://api.github.com/user/repos",
+      {
+        headers:{
+          'Authorization': 'token '+ this.userToken,
+          'X-OAuth-Scopes': 'repo',
+          'Accept': 'application/json',
+          'x-requested-with': 'http://192.168.1.143:8080/',
+        }
+      })
+      .then(response => {
+      {
             this.isLoading = false;
             this.reposList = response.data.map((x: any) => new RepositoryInfo(x))
-            }
-      )
-      .catch(error => {
+      }
+      }, error => {
         this.isLoading = false;
         console.error(error)});
   }
@@ -136,7 +148,7 @@ export default class ReposList extends BasePage {
   showRepoDetails(repo: RepositoryInfo) {
     (Vue as any).router.push({
       name: "RepoCommitsList",
-      params: { credentials: this.credentials, repository: repo }
+      params: {repository: repo}
     });
   }
   

@@ -3,8 +3,6 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
-import './plugins/vue-axios';
-import './plugins/vue-auth';
 import './plugins/moment';
 
 Vue.config.productionTip = false

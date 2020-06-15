@@ -7,14 +7,14 @@
         </v-card-title>
         <v-card-subtitle style="padding-bottom: 0px; padding-top: 0px;">
           <span class="headline">
-            <v-label>Автор: {{commitDetails.commit.author.name}}&lt;{{commitDetails.commit.author.email}}&gt;</v-label>
+            <v-label>Автор: {{commitDts.commit.author.name}}&lt;{{commitDts.commit.author.email}}&gt;</v-label>
           </span>
         </v-card-subtitle>
         <v-card-text>
           <v-container>
             <v-row>
               <span>Описание:</span>
-              <span>{{commitDetails.commit.message}}</span>
+              <span>{{commitDts.commit.message}}</span>
             </v-row>
             <v-row style="padding-top:5px">
               <!-- Таблица с изменениями файлов -->
@@ -22,7 +22,7 @@
                 dense
                 sortBy="commit.author.date"
                 :headers="headers"
-                :items="commitDetails.files"
+                :items="commitDts.files"
                 :items-per-page="10"
                 class="elevation-1"
               >
@@ -82,8 +82,12 @@ import consts from "../constants"
 
 @Component({ components: { WaitOverlay } })
 export default class CommitDetailPopup extends Vue {
-  @Prop() commitDetails: any;
-  @Prop() commitDetailsShown: boolean | undefined;
+  @Prop() commitDetails: any|undefined;
+  @Prop() commitDetailsShown: boolean|undefined;
+
+  public get commitDts(){
+    return this.commitDetails === undefined ? {} as any : this.commitDetails;
+  }
 
   private readonly headers = [
     { text: "Файл", value: "filename", divider: true, sortable: true,align: 'start'  },
@@ -94,6 +98,11 @@ export default class CommitDetailPopup extends Vue {
   ];
 
   public get formattedCommitTime() {
+    if (this.commitDetails === undefined || this.commitDetails.commit === undefined)
+    {
+      return "-"
+    }
+    
     return moment(this.commitDetails.commit.author.date).format(
       consts.DISPLAY_TIME_FORMAT
     );
