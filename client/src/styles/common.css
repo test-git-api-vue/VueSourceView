@@ -1,0 +1,19 @@
+.no-paddings {
+    padding: 0px;
+  }
+
+  .no-padding-left {
+    padding-left: 0px;
+  }
+  
+  .no-top-bottom-paddings {
+    padding-bottom: 0px;
+    padding-top: 0px;
+  }
+
+  .no-left-right-margins {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+
+ 

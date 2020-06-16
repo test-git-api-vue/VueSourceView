@@ -1,3 +1,6 @@
+<style scoped src="../../styles/repoCommitsList.css"></style>
+<style scoped src="../../styles/common.css"></style>
+
 <template>
   <v-app>
     <v-container fluid pl-3 pr-1>
@@ -29,14 +32,21 @@
           
           <v-data-table
             dense
-            sortBy="commit.author.date"
             :headers="headers"
             :items="commits"
-            :items-per-page="10"
+            :items-per-page="8"
             class="elevation-1"
+            :sort-by="['commit.author.date']"
+            :sort-desc="[true]"
+            multi-sort
           >
             <template
               v-slot:item.commit.author.date="{ item }">{{ getConvertedTime(item.commit.author.date) }}
+            </template>
+
+             <template
+              v-slot:item.commit.author.email="{ item }">
+              <a class="v-label" v-bind:href="getMailToLink(item.commit.author.email)">{{ item.commit.author.email }}</a>
             </template>
 
             <template
@@ -70,38 +80,6 @@
   </v-app>
 </template>
 
-<style scoped>
-
-.last-loaded-time
-{
-  padding-right:12px
-}
-
-.v-btn {
-  color: white;
-  margin-top: 5px;
-}
-.v-select {
-  max-width: 200px;
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
-
-.no-paddings {
-  padding: 0px;
-}
-
-.no-top-bottom-paddings {
-  padding-bottom: 0px;
-  padding-top: 0px;
-}
-
-.no-left-right-margins {
-  margin-left: 0px;
-  margin-right: 0px;
-}
-</style>
-
 <script lang="ts">
 import { Vue, Component, Prop } from "vue-property-decorator";
 import RepositoryInfo from "..//..//Models/repositoryInfo";
@@ -115,6 +93,7 @@ import BasePage from "../BasePage";
 import moment from "moment";
 import consts from "../../constants";
 
+
 @Component({ components: { AppHeader, WaitOverlay, CommitDetailPopup } })
 export default class RepoCommitsList extends BasePage {
   @Prop() repository: RepositoryInfo|undefined;
@@ -124,24 +103,7 @@ export default class RepoCommitsList extends BasePage {
   private commitDetailsShown = false;
   private lastUpdated = new Date()
 
-  branches = [];
-  commits = [];
-  
-  selectedBranchName = "";
-
-  public get branchNames(): string[] {
-    return (this.branches as any[]).map(x => x.name);
-  }
-
-  public get userLogin(){
-    return localStorage["vsv_login"];
-  }
-
-    public get userToken(){
-    return localStorage["vsv_token"];
-  }
-
-  private readonly headers = [
+    private readonly headers = [
     {
       text: "Время",
       align: "start",
@@ -156,8 +118,42 @@ export default class RepoCommitsList extends BasePage {
     { text: "", value: "", width:"20px", divider:true,  },
   ];
 
-beforeMount() {
+  branches = [];
+  commits = [];
+  selectedBranchName = "";
 
+constructor()
+{
+  super()
+     
+    if (this.userToken === undefined || this.userToken === null || this.userToken == "") 
+    {
+      (Vue as any).router.push({ name: "Login" });
+    }
+}
+
+  public get branchNames(): string[] {
+    return (this.branches as any[]).map(x => x.name);
+  }
+
+  public get userLogin(){
+    return localStorage[consts.STORAGE_USER_LOGIN_KEY];
+  }
+
+    public get userToken(){
+    return localStorage[consts.STORAGE_USER_TOKEN_KEY];
+  }
+
+  getConvertedTime(time: any) {
+    const convertedTime = moment(time).format(consts.DISPLAY_TIME_FORMAT)
+    return convertedTime;
+  }
+
+  getMailToLink(email: string) {
+    return "mailto:"+email;
+  }
+
+    beforeMount() {
 
      if (this.userLogin == undefined || (this.userLogin == "" && this.userToken == ""))
     {
@@ -176,6 +172,8 @@ beforeMount() {
 
   mounted() {
   
+  this.updateTitle(router.currentRoute)
+
   if (this.userLogin == undefined || this.repoInfo == null)
   {
     return;
@@ -230,11 +228,6 @@ beforeMount() {
         this.isLoading = false;
         console.error(error);
       });
-  }
-
-  getConvertedTime(time: any) {
-    const convertedTime = moment(time).format(consts.DISPLAY_TIME_FORMAT)
-    return convertedTime;
   }
 
   showCommitDetails(sha: string) {

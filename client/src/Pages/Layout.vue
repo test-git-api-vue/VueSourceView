@@ -10,7 +10,15 @@
         <v-spacer></v-spacer>
         <v-card-text class="white--text text-center">
           {{ currentYear() }} &copy; VueSourceView
+
+      <!--   <v-btn href="https://github.com/vuetifyjs/vuetify/releases/latest" target="_blank" text>
+          <span class="mr-2 white--text">Latest Vuetify Release</span>
+          <v-icon>mdi-open-in-new</v-icon>
+        </v-btn> -->
+
         </v-card-text>
+
+        
       </v-footer>
   </v-app>
 

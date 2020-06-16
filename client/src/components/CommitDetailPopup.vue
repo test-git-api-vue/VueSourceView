@@ -7,14 +7,15 @@
         </v-card-title>
         <v-card-subtitle style="padding-bottom: 0px; padding-top: 0px;">
           <span class="headline">
-            <v-label>Автор: {{commitDts.commit.author.name}}&lt;{{commitDts.commit.author.email}}&gt;</v-label>
+            <v-label>Автор: </v-label>
+          <a class="v-label" v-bind:href="authorEmailLink">{{commitDetailsShown ? commitDts.commit.author.name : ''}} &lt;{{ authorEmail }}&gt;</a>
           </span>
         </v-card-subtitle>
         <v-card-text>
           <v-container>
             <v-row>
               <span>Описание:</span>
-              <span>{{commitDts.commit.message}}</span>
+              <span>{{commitDetailsShown ? commitDts.commit.message : ''}}</span>
             </v-row>
             <v-row style="padding-top:5px">
               <!-- Таблица с изменениями файлов -->
@@ -86,7 +87,7 @@ export default class CommitDetailPopup extends Vue {
   @Prop() commitDetailsShown: boolean|undefined;
 
   public get commitDts(){
-    return this.commitDetails === undefined ? {} as any : this.commitDetails;
+    return this.commitDetailsShown ? this.commitDetails : {} as any;
   }
 
   private readonly headers = [
@@ -97,8 +98,16 @@ export default class CommitDetailPopup extends Vue {
     { text: "- ", value: "deletions", divider: true,align: 'center' }
   ];
 
+  public get authorEmail(){
+    return this.commitDetailsShown ? this.commitDts.commit.author.email : '';
+  }
+  
+     public get authorEmailLink(){
+      return "mailto:"+this.authorEmail;
+    }
+
   public get formattedCommitTime() {
-    if (this.commitDetails === undefined || this.commitDetails.commit === undefined)
+    if (this.commitDts === undefined || this.commitDts.commit === undefined)
     {
       return "-"
     }

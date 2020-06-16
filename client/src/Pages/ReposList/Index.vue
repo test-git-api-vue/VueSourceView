@@ -1,3 +1,6 @@
+<style scoped src="../../styles/reposList.css"></style>
+<style scoped src="../../styles/common.css"></style>
+
 <template>
   <v-app>
     <v-container fluid pl-3 pr-1>
@@ -56,36 +59,6 @@
 
 </template>
 
-<style scoped>
-.v-btn {
-  color: white;
-  margin-top: 5px;
-}
-.v-select {
-  max-width: 200px;
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
-
-.no-paddings {
-  padding: 0px;
-}
-
-.no-padding-left {
-  padding-left: 0px;
-}
-
-.no-top-bottom-paddings {
-  padding-bottom: 0px;
-  padding-top: 0px;
-}
-
-.no-left-right-margins {
-  margin-left: 0px;
-  margin-right: 0px;
-}
-</style>
-
 <script lang="ts">
 import { Vue, Component, Prop } from "vue-property-decorator";
 import RepositoryInfo from "..//..//Models/repositoryInfo";
@@ -94,28 +67,26 @@ import axios from "axios";
 import AppHeader from "../../components/AppHeader.vue";
 import WaitOverlay from "../../components/WaitOverlay.vue";
 import BasePage from '../BasePage';
+import consts from "../../constants";
 
 @Component({ components: { AppHeader,WaitOverlay } })
 export default class ReposList extends BasePage {
 
 public get userLogin()
 {
-  return localStorage["vsv_login"];
+  return localStorage[consts.STORAGE_USER_LOGIN_KEY];
 }
 
 public get userToken()
 {
-  return localStorage["vsv_token"];
+  return localStorage[consts.STORAGE_USER_TOKEN_KEY];
 }
 
   constructor() {
     super();
     
-    if (
-      this.userLogin === undefined ||
-      this.userLogin === null ||
-      (this.userToken == "" && this.userToken == "")
-    ) {
+    if (this.userToken === undefined || this.userToken === null || this.userToken == "") 
+    {
       (Vue as any).router.push({ name: "Login" });
     }
   }
@@ -123,6 +94,8 @@ public get userToken()
   reposList: Array<RepositoryInfo> = [] as Array<RepositoryInfo>;
 
   mounted() {
+    this.updateTitle((Vue as any).router.currentRoute)
+    
     this.isLoading = true;
     
     this.$http

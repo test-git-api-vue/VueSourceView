@@ -1,0 +1,14 @@
+.last-loaded-time
+{
+  padding-right:12px
+}
+
+.v-btn {
+  color: white;
+  margin-top: 5px;
+}
+.v-select {
+  max-width: 200px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}

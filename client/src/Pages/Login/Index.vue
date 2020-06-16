@@ -68,6 +68,8 @@ export default class Login extends BasePage {
   }
 
   mounted() {
+    this.updateTitle(router.currentRoute)
+
     const authCode = this.$route.query.code;
 
     if (authCode != undefined) {
@@ -107,7 +109,7 @@ this.$http.post('http://192.168.1.143:3001/https://github.com/login/oauth/access
 }
 else{
     this.credentials.login = "test-git-api-vue";
-    localStorage["vsv_login"] = this.credentials.login;
+    localStorage[consts.STORAGE_USER_LOGIN_KEY] = this.credentials.login;
 }
 
     
@@ -117,7 +119,7 @@ else{
 
  public updateCredentialsAndGoNext() {
    
-  localStorage["vsv_token"] = this.credentials.token;
+  localStorage[consts.STORAGE_USER_TOKEN_KEY] = this.credentials.token;
   
     (Vue as any).router.push({
       name: "ReposList",
@@ -131,7 +133,7 @@ else{
   tryLoginGitHub() {
     //Перенаправяем пользователя на GitHub для ввода пароля
 
-    localStorage["vsv_login"] = this.credentials.login;
+    localStorage[consts.STORAGE_USER_LOGIN_KEY] = this.credentials.login;
 
     window.location.href =
       "https://github.com/login/oauth/authorize?login=" +
