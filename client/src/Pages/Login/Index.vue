@@ -54,6 +54,8 @@ import loginForm from "./Login.vue";
 import axios, { AxiosPromise } from "axios";
 import vueResource from "vue-resource";
 
+import {getGitHubAuthCode, getGitHubToken} from '../../services/auth-service';
+
 Vue.use(vueResource);
 
 @Component({ components: { AppHeader } })
@@ -70,25 +72,14 @@ export default class Login extends BasePage {
   mounted() {
     this.updateTitle(router.currentRoute)
 
-    const authCode = this.$route.query.code;
+    const authCode = this.$route.query.code as string;
 
     if (authCode != undefined) {
 
  this.isLoading = true;
 
-this.$http.post('http://192.168.1.143:3001/https://github.com/login/oauth/access_token?scope=repo',
-{
-  'client_id': consts.GITHUB_APP_CLIENT_ID,
-   'client_secret': consts.GITHUB_APP_CLIENT_SECRET,
-   'code': authCode,
-},
-{headers: {
-'Accept': 'application/json',
-'X-OAuth-Scopes': 'repo',
-'x-requested-with': 'http://192.168.1.143:8080/',
-}}
-)
-.then(response => {
+  getGitHubToken(authCode)
+  .then(response  => {
 
     this.isLoading = false;
 
@@ -138,14 +129,9 @@ else{
     localStorage[consts.STORAGE_USER_LOGIN_KEY] = this.credentials.login;
 
     //не имеет смысла из-за redirect-а
-    //this.$store.dispatch('setLogin', this.credentials.login);
+    this.$store.dispatch('setLogin', this.credentials.login);
 
-    window.location.href =
-      "https://github.com/login/oauth/authorize?login=" +
-      this.credentials.login +
-      "&client_id=" +
-      consts.GITHUB_APP_CLIENT_ID+
-      "&scope=repo";
+    getGitHubAuthCode(this.credentials.login);
   }
 
   reset() {
