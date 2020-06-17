@@ -27,7 +27,7 @@
 <v-row class="no-left-right-margins">
       <v-card min-width="100%" class="mx-auto">
         <v-list two-line flat class="no-left-right-margins">
-          <v-list-item v-show="repo.owner == userLogin" v-for="repo in reposList" :key="repo.name" @click="showRepoDetails(repo)">
+          <v-list-item v-for="repo in reposList" :key="repo.name" @click="showRepoDetails(repo)">
             <v-list-item-avatar>
               <v-icon>mdi-folder</v-icon>
             </v-list-item-avatar>
@@ -74,12 +74,17 @@ export default class ReposList extends BasePage {
 
 public get userLogin()
 {
-  return localStorage[consts.STORAGE_USER_LOGIN_KEY];
+  return this.$store.state.userLogin;
+}
+
+public get reposList()
+{
+  return this.$store.state.repositories;
 }
 
 public get userToken()
 {
-  return localStorage[consts.STORAGE_USER_TOKEN_KEY];
+  return this.$store.state.userToken;
 }
 
   constructor() {
@@ -90,8 +95,6 @@ public get userToken()
       (Vue as any).router.push({ name: "Login" });
     }
   }
-
-  reposList: Array<RepositoryInfo> = [] as Array<RepositoryInfo>;
 
   mounted() {
     this.updateTitle((Vue as any).router.currentRoute)
@@ -111,17 +114,19 @@ public get userToken()
       .then(response => {
       {
             this.isLoading = false;
-            this.reposList = response.data.map((x: any) => new RepositoryInfo(x))
-      }
+            this.$store.dispatch('setRepositories', response.data.map((x: any) => new RepositoryInfo(x))
+      )}
       }, error => {
         this.isLoading = false;
         console.error(error)});
   }
 
   showRepoDetails(repo: RepositoryInfo) {
+    
+    this.$store.dispatch('setSelectedRepository', repo);
+
     (Vue as any).router.push({
       name: "RepoCommitsList",
-      params: {repository: repo}
     });
   }
   

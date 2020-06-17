@@ -93,6 +93,8 @@ this.$http.post('http://192.168.1.143:3001/https://github.com/login/oauth/access
     this.isLoading = false;
 
     this.credentials.token = response.data.access_token;
+    //был выставлен перед redirect-ом на github
+    this.credentials.login = localStorage[consts.STORAGE_USER_LOGIN_KEY];
 
     this.updateCredentialsAndGoNext();
 
@@ -110,16 +112,16 @@ this.$http.post('http://192.168.1.143:3001/https://github.com/login/oauth/access
 else{
     this.credentials.login = "test-git-api-vue";
     localStorage[consts.STORAGE_USER_LOGIN_KEY] = this.credentials.login;
+    this.$store.dispatch('setLogin', this.credentials.login);
 }
-
-    
   }
-
-
 
  public updateCredentialsAndGoNext() {
    
   localStorage[consts.STORAGE_USER_TOKEN_KEY] = this.credentials.token;
+
+  this.$store.dispatch('setToken', this.credentials.token);
+  this.$store.dispatch('setLogin', this.credentials.login);
   
     (Vue as any).router.push({
       name: "ReposList",
@@ -134,6 +136,9 @@ else{
     //Перенаправяем пользователя на GitHub для ввода пароля
 
     localStorage[consts.STORAGE_USER_LOGIN_KEY] = this.credentials.login;
+
+    //не имеет смысла из-за redirect-а
+    //this.$store.dispatch('setLogin', this.credentials.login);
 
     window.location.href =
       "https://github.com/login/oauth/authorize?login=" +

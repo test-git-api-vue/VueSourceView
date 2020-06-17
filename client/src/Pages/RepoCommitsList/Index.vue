@@ -66,7 +66,7 @@
           <span class="mr-2">К списку репозиториев</span>
         </v-btn>
         <v-spacer></v-spacer>
-         <span class="last-loaded-time">Данные загружены: {{getConvertedTime(this.lastUpdated)}}</span>
+         <span class="last-loaded-time">Данные загружены: {{ lastUpdated }}</span>
       </v-row>
     </v-container>
 
@@ -96,13 +96,10 @@ import consts from "../../constants";
 
 @Component({ components: { AppHeader, WaitOverlay, CommitDetailPopup } })
 export default class RepoCommitsList extends BasePage {
-  @Prop() repository: RepositoryInfo|undefined;
-
-  private repoInfo = {} as RepositoryInfo;
+  
   private commitDetails = {} as any;
   private commitDetailsShown = false;
-  private lastUpdated = new Date()
-
+  
     private readonly headers = [
     {
       text: "Время",
@@ -118,9 +115,10 @@ export default class RepoCommitsList extends BasePage {
     { text: "", value: "", width:"20px", divider:true,  },
   ];
 
-  branches = [];
-  commits = [];
-  selectedBranchName = "";
+public get selectedBranchName()
+{
+  return this.$store.state.selectedBranchName;
+}
 
 constructor()
 {
@@ -132,16 +130,34 @@ constructor()
     }
 }
 
+public get repoInfo(){
+  return this.$store.state.selectedRepository as RepositoryInfo;
+}
+
+ public get lastUpdated(){
+
+    const lastUpd = this.$store.state.lastUpdatedCommitsList;
+
+    if (lastUpd == undefined || lastUpd == null) 
+    {
+       return 'никогда';
+    }
+     
+    return this.getConvertedTime(lastUpd)
+ }
+
   public get branchNames(): string[] {
-    return (this.branches as any[]).map(x => x.name);
+  const branches = this.$store.state.branches as any[];
+
+  return branches ? (this.$store.state.branches as any[]).map(x => x.name) : [];
   }
 
-  public get userLogin(){
-    return localStorage[consts.STORAGE_USER_LOGIN_KEY];
+  public get commits(){
+    return this.$store.state.commits;
   }
 
-    public get userToken(){
-    return localStorage[consts.STORAGE_USER_TOKEN_KEY];
+  public get userToken(){
+    return this.$store.state.userToken;
   }
 
   getConvertedTime(time: any) {
@@ -155,26 +171,18 @@ constructor()
 
     beforeMount() {
 
-     if (this.userLogin == undefined || (this.userLogin == "" && this.userToken == ""))
+     if (this.userToken == undefined || this.userToken == "")
     {
       (Vue as any).router.push({ name: "Login" });
       return;
     }
-
-    if (this.repository == undefined || (this.repository.name == ""))
-    {
-      (Vue as any).router.push({ name: "Login" });
-      return;
-    }
-
-    this.repoInfo = this.repository as RepositoryInfo;
-}
+  }
 
   mounted() {
   
   this.updateTitle(router.currentRoute)
 
-  if (this.userLogin == undefined || this.repoInfo == null)
+  if (this.$store.state.userLogin == undefined || this.repoInfo == null)
   {
     return;
   }
@@ -183,7 +191,7 @@ constructor()
     axios
       .get(
         "http://192.168.1.143:3001/https://api.github.com/repos/" +
-          this.userLogin +
+          this.$store.state.userLogin +
           "/" +
           this.repoInfo.name +
           "/branches"
@@ -194,13 +202,14 @@ constructor()
         }
       })
       .then(branchesResponse => {
-        this.branches = branchesResponse.data;
-        this.selectedBranchName = branchesResponse.data[0].name;
+
+        this.$store.dispatch('setBranches', branchesResponse.data);
+        this.$store.dispatch('setSelectedBranchName', branchesResponse.data[0].name);
 
         axios
           .get(
             "http://192.168.1.143:3001/https://api.github.com/repos/" +
-              this.userLogin +
+              this.$store.state.userLogin +
               "/" +
               this.repoInfo.name +
               "/" +
@@ -216,8 +225,7 @@ constructor()
           )
           .then(response => {
             this.isLoading = false;
-            this.commits = response.data;
-            this.lastUpdated = new Date()
+            this.$store.dispatch('setCommits', response.data)
           })
           .catch(error => {
             this.isLoading = false;
@@ -234,7 +242,7 @@ constructor()
     this.isLoading = true;
 
    axios.get("http://192.168.1.143:3001/https://api.github.com/repos/" 
-   + this.userLogin + "/" + this.repoInfo.name + "/" + "commits/" + sha,
+   + this.$store.state.userLogin + "/" + this.repoInfo.name + "/" + "commits/" + sha,
    {
      headers:{
         'x-requested-with': 'http://192.168.1.143:8080/',
@@ -261,7 +269,7 @@ selectedBranchChanged() {
     axios
       .get(
         "http://192.168.1.143:3001/https://api.github.com/repos/" +
-          this.userLogin +
+          this.$store.state.userLogin +
           "/" +
           this.repoInfo.name +
           "/" +
@@ -277,8 +285,7 @@ selectedBranchChanged() {
       )
       .then(response => {
         this.isLoading = false;
-        this.commits = response.data;
-        this.lastUpdated = new Date()
+        this.$store.dispatch('setCommits', response.data)
       })
       .catch(error => {
         this.isLoading = false;
